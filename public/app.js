@@ -1,19 +1,10 @@
-// Grab the articles as a json
 var articlesElem = $("#articles");
 $(".scrape-new").click(function(event){
-  // alert("click");
   articlesElem.empty();
-  $.getJSON("/scrape", function(data) {
-    // For each one
-    for (var i = 0; i < data.length; i++) {
-      // Display the apropos information on the page
-      articlesElem.append("<div class='card bg-dark'><div class='card-body'><h2 class='card-text' data-id='" + data[i]._id + "'>" + data[i].title + "</h2><a href='"+ data[i].link +"'><p>" + data[i].link + "</p></a><a href='#' class='btn btn-primary'>Save</a></div></div>");
-    }
-  });
+  renderArticles();
 })
 
 $(".clear").click(function(event){
-  // alert("click");
   location.reload();
   articlesElem.empty();
   $.getJSON("/clear", function(){
@@ -22,7 +13,6 @@ $(".clear").click(function(event){
 });
 
 
-// Whenever someone clicks a p tag
 $(document).on("click", "p", function() {
   // Empty the notes from the note section
   $("#notes").empty();
@@ -37,16 +27,11 @@ $(document).on("click", "p", function() {
     // With that done, add the note information to the page
     .then(function(data) {
       console.log(data);
-      // The title of the article
       $("#notes").append("<h2>" + data.title + "</h2>");
-      // An input to enter a new title
       $("#notes").append("<input id='titleinput' name='title' >");
-      // A textarea to add a new note body
       $("#notes").append("<textarea id='bodyinput' name='body'></textarea>");
-      // A button to submit a new note, with the id of the article saved to it
       $("#notes").append("<button data-id='" + data._id + "' id='savenote'>Save Note</button>");
 
-      // If there's a note in the article
       if (data.note) {
         // Place the title of the note in the title input
         $("#titleinput").val(data.note.title);
@@ -56,7 +41,6 @@ $(document).on("click", "p", function() {
     });
 });
 
-// When you click the savenote button
 $(document).on("click", "#savenote", function() {
   // Grab the id associated with the article from the submit button
   var thisId = $(this).attr("data-id");
@@ -84,3 +68,31 @@ $(document).on("click", "#savenote", function() {
   $("#titleinput").val("");
   $("#bodyinput").val("");
 });
+
+$(document).ready(function(){
+  renderArticles();
+});
+
+function renderArticles(){
+  $.getJSON("/scrape", function(data) {
+    // For each one
+    for (var i = 0; i < data.length; i++) {
+      if(!data[i].saved){
+        // Display the apropos information on the page
+        articlesElem.append("<div class='card bg-dark'><div class='card-body'><h2 class='card-text' data-id='" + data[i]._id + "'>" + data[i].title + "</h2><a href='"+ data[i].link +"'><p>" + data[i].link + "</p></a><a class='btn btn-primary save'>Save</a></div></div>");
+      }
+    }
+  });
+}
+
+function renderSavedArticle(){
+  $.getJSON("/scrape", function(data) {
+    // For each one
+    for (var i = 0; i < data.length; i++) {
+      if(data[i].saved){
+        // Display the apropos information on the page
+        articlesElem.append("<div class='card bg-dark'><div class='card-body'><h2 class='card-text' data-id='" + data[i]._id + "'>" + data[i].title + "</h2><a href='"+ data[i].link +"'><p>" + data[i].link + "</p></a><a class='btn btn-primary unsave'>Unsave</a><a href='#' class='btn btn-primary comment'>Add a comment</a></div></div>");
+      }
+    }
+  });
+}

@@ -46,7 +46,7 @@
   
   body {
     margin-bottom: 80px;
-    background-color: rgb(54, 54, 54)
+    /* background-color: rgb(54, 54, 54) */
   }
   
   .card a:not([href]):not([tabindex]).scrape-new {
@@ -186,6 +186,10 @@
   } */
   
   .scrape-new {
+    cursor: pointer;
+  }
+
+  .clear{
     cursor: pointer;
   }
   

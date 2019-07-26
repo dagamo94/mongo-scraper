@@ -119,6 +119,18 @@ app.post("/articles/:id", function (req, res) {
   });
 });
 
+app.get("/saved", function(req, res){
+  res.render("saved"); // create saved.handlebars file
+});
+
+app.get("/saved/articles", function(req, res){
+  db.Article.find({saved: true}).then(function(articles){
+    res.json(articles);
+  }).catch(function(err){
+    res.json(err);
+  });
+});
+
 app.get("/clear", function (req, res) {
   db.Article.remove().then(function (removed) {
     res.json(removed);
