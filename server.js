@@ -31,12 +31,17 @@ app.engine("handlebars", exphbs({ defaultLayout: "main" }));
 app.set("view engine", "handlebars");
 
 // Connect to the Mongo DB
-mongoose.connect("mongodb://localhost/mongohomework", { useNewUrlParser: true });
+var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongohomework";
+mongoose.connect(MONGODB_URI, { useNewUrlParser: true });
 
 // Routes
 
 // A GET route for scraping the echoJS website
 app.get("/", function (req, res) {
+  res.render("index");
+})
+
+app.get("/scrape", function (req, res) {
   // First, we grab the body of the html with axios
   axios.get("http://www.echojs.com/").then(function (response) {
     // Then, we load that into cheerio and save it to $ for a shorthand selector
@@ -61,11 +66,10 @@ app.get("/", function (req, res) {
         });
     });
   });
-  res.render("index");
-})
+  res.end();
+});
 
-app.get("/scrape", function (req, res) {
-  
+app.get("/display", function(req, res){
   db.Article.find({}).then(function (articles) {
     res.json(articles);
   }).catch(function (err) {

@@ -4,15 +4,28 @@ const savedArticlesElem = $("#saved-articles");
 let goToSaved = false;
 let savedArticles;
 $(".scrape-new").click(function (event) {
-  location.reload();
+  // location.reload();
+  // articlesElem.empty();
+  // renderArticles();
+
+  $.get("/scrape", function (scraped) {
+    console.log("scraped");
+  }).then(function () {
+    articlesElem.append("<p>DONE SCRAPING, PLEASE PRESS 'DISPLAY SCRAPED ARTICLES'</p>");
+  });
+})
+
+$(".show-scraped").click(function (event) {
   articlesElem.empty();
   renderArticles();
 })
 
 $(".clear").click(function (event) {
+  location.reload();
   articlesElem.empty();
   $.getJSON("/clear", function () {
     articlesElem.append("<p>CLEARED ALL ARTICLES</p>");
+    savedArticlesElem.append("<p>CLEARED ALL ARTICLES</p>");
   })
 });
 
@@ -79,30 +92,30 @@ $(document).ready(function () {
 });
 
 // WHEN SAVED IS CLICKED
-$(document).on("click", ".save", function(){
+$(document).on("click", ".save", function () {
   let savedId = $(this).attr("data-id");
   // alert($(this).attr("data-id"));
-  alert(savedId);
+  // alert(savedId);
   $(this).parent().parent().hide();
-  $.post("/saved/articles/" + savedId, function(article){
+  $.post("/saved/articles/" + savedId, function (article) {
     console.log(article);
   })
 });
 
 // WHEN UNSAVE IS CLICKED
-$(document).on("click", ".unsave", function(){
+$(document).on("click", ".unsave", function () {
   let savedId = $(this).attr("data-id");
   // alert($(this).attr("data-id"));
-  alert(savedId);
+  // alert(savedId);
   $(this).parent().parent().hide();
-  $.post("/saved/articles/unsave/" + savedId, function(article){
+  $.post("/saved/articles/unsave/" + savedId, function (article) {
     console.log(article);
   })
 });
 
 // RENDERING TO PAGE FUNCTIONS
 function renderArticles() {
-  $.getJSON("/scrape", function (data) {
+  $.getJSON("/display", function (data) {
     savedArticles = data;
     if (data.length) {
       for (var i = 0; i < data.length; i++) {
