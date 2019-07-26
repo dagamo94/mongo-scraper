@@ -89,6 +89,18 @@ $(document).on("click", ".save", function(){
   })
 });
 
+// WHEN UNSAVE IS CLICKED
+$(document).on("click", ".unsave", function(){
+  let savedId = $(this).attr("data-id");
+  // alert($(this).attr("data-id"));
+  alert(savedId);
+  $(this).parent().parent().hide();
+  $.post("/saved/articles/unsave/" + savedId, function(article){
+    console.log(article);
+  })
+});
+
+// RENDERING TO PAGE FUNCTIONS
 function renderArticles() {
   $.getJSON("/scrape", function (data) {
     savedArticles = data;

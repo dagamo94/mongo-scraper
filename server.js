@@ -125,6 +125,14 @@ app.post("/saved/articles/:id", function(req, res){
   });
 });
 
+app.post("/saved/articles/unsave/:id", function(req, res){
+  db.Article.findOneAndUpdate({ _id: req.params.id }, { $set: { saved: false } }, { new: true }).then(function(article){
+    res.json(article);
+  }).catch(function(err){
+    res.json(err);
+  });
+});
+
 app.get("/clear", function (req, res) {
   db.Article.remove().then(function (removed) {
     res.json(removed);
