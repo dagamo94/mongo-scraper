@@ -1,21 +1,25 @@
-var articlesElem = $("#articles");
-$(".scrape-new").click(function(event){
+const articlesElem = $("#articles");
+const savedArticlesElem = $("#saved-articles");
+
+let goToSaved = false;
+let savedArticles;
+$(".scrape-new").click(function (event) {
+  location.reload();
   articlesElem.empty();
   renderArticles();
 })
 
-$(".clear").click(function(event){
-  location.reload();
+$(".clear").click(function (event) {
   articlesElem.empty();
-  $.getJSON("/clear", function(){
+  $.getJSON("/clear", function () {
     articlesElem.append("<p>CLEARED ALL ARTICLES</p>");
   })
 });
 
 
-$(document).on("click", "p", function() {
+$(document).on("click", ".comment", function () {
   // Empty the notes from the note section
-  $("#notes").empty();
+  $("#comments").empty();
   // Save the id from the p tag
   var thisId = $(this).attr("data-id");
 
@@ -25,23 +29,23 @@ $(document).on("click", "p", function() {
     url: "/articles/" + thisId
   })
     // With that done, add the note information to the page
-    .then(function(data) {
+    .then(function (data) {
       console.log(data);
-      $("#notes").append("<h2>" + data.title + "</h2>");
-      $("#notes").append("<input id='titleinput' name='title' >");
-      $("#notes").append("<textarea id='bodyinput' name='body'></textarea>");
-      $("#notes").append("<button data-id='" + data._id + "' id='savenote'>Save Note</button>");
+      $("#comments").append("<h2>" + data.title + "</h2>");
+      $("#comments").append("<input id='titleinput' name='title' >");
+      $("#comments").append("<textarea id='bodyinput' name='body'></textarea>");
+      $("#comments").append("<button data-id='" + data._id + "' id='savenote'>Save Note</button>");
 
-      if (data.note) {
+      if (data.notes) {
         // Place the title of the note in the title input
-        $("#titleinput").val(data.note.title);
+        $("#titleinput").val(data.notes[0].title);
         // Place the body of the note in the body textarea
-        $("#bodyinput").val(data.note.body);
+        $("#bodyinput").val(data.notes[0].body);
       }
     });
 });
 
-$(document).on("click", "#savenote", function() {
+$(document).on("click", "#savenote", function () {
   // Grab the id associated with the article from the submit button
   var thisId = $(this).attr("data-id");
 
@@ -57,7 +61,7 @@ $(document).on("click", "#savenote", function() {
     }
   })
     // With that done
-    .then(function(data) {
+    .then(function (data) {
       // Log the response
       console.log(data);
       // Empty the notes section
@@ -69,29 +73,43 @@ $(document).on("click", "#savenote", function() {
   $("#bodyinput").val("");
 });
 
-$(document).ready(function(){
+$(document).ready(function () {
   renderArticles();
+  renderSavedArticle();
 });
 
-function renderArticles(){
-  $.getJSON("/scrape", function(data) {
-    // For each one
-    for (var i = 0; i < data.length; i++) {
-      if(!data[i].saved){
-        // Display the apropos information on the page
-        articlesElem.append("<div class='card bg-dark'><div class='card-body'><h2 class='card-text' data-id='" + data[i]._id + "'>" + data[i].title + "</h2><a href='"+ data[i].link +"'><p>" + data[i].link + "</p></a><a class='btn btn-primary save'>Save</a></div></div>");
+// WHEN SAVED IS CLICKED
+$(document).on("click", ".save", function(){
+  let savedId = $(this).attr("data-id");
+  // alert($(this).attr("data-id"));
+  alert(savedId);
+  $(this).parent().parent().hide();
+  $.post("/saved/articles/" + savedId, function(article){
+    console.log(article);
+  })
+});
+
+function renderArticles() {
+  $.getJSON("/scrape", function (data) {
+    savedArticles = data;
+    if (data.length) {
+      for (var i = 0; i < data.length; i++) {
+        if (!data[i].saved) {
+          // Display the apropos information on the page
+          articlesElem.append("<div class='card bg-dark'><div class='card-body'><h2 class='card-text' data-id='" + data[i]._id + "'>" + data[i].title + "</h2><a href='" + data[i].link + "' target='_blank'><p>" + data[i].link + "</p></a><a class='btn btn-primary save' data-id='" + data[i]._id + "'>Save</a></div></div>");
+        }
       }
     }
   });
 }
 
-function renderSavedArticle(){
-  $.getJSON("/scrape", function(data) {
-    // For each one
+function renderSavedArticle() {
+  $.getJSON("/saved/articles", function (data) {
+    savedArticles = data;
     for (var i = 0; i < data.length; i++) {
-      if(data[i].saved){
+      if (data[i].saved) {
         // Display the apropos information on the page
-        articlesElem.append("<div class='card bg-dark'><div class='card-body'><h2 class='card-text' data-id='" + data[i]._id + "'>" + data[i].title + "</h2><a href='"+ data[i].link +"'><p>" + data[i].link + "</p></a><a class='btn btn-primary unsave'>Unsave</a><a href='#' class='btn btn-primary comment'>Add a comment</a></div></div>");
+        savedArticlesElem.append("<div class='card bg-dark'><div class='card-body'><h2 class='card-text' data-id='" + data[i]._id + "'>" + data[i].title + "</h2><a href='" + data[i].link + "'><p>" + data[i].link + "</p></a><a class='btn btn-primary unsave' data-id='" + data[i]._id + "'>Unsave</a><a  class='btn btn-primary comment' data-id='" + data[i]._id + "'>Add a comment</a></div></div>");
       }
     }
   });
